@@ -17,7 +17,18 @@ const user   = require('./users')
 
 // POST /user/login
 const logInController = (req, res, next) => {
-  
+  let {username, password} = req.body;
+  if (username.length == 0 || password.length == 0)
+    throw Error(`Username or password are empty`)
+
+  user.login(username, password)
+  .then(() => {
+    res.status(201).send({
+      success: 'true',
+      message: 'User logged in successfully',
+    });
+  })
+  .catch(error => {next(Error(`User cannot sign in:\n${error}`))});  
 }
 
 // POST /user/register
@@ -40,13 +51,10 @@ const registerController = (req, res, next) => {
 
 
 const errorController = (err, req, res, next) => {
-  if (req.originalUrl.includes('/api/'))
-    res.status(409).send({
-      success: 'false',
-      message: err.toString(),
-    });
-  else
-    res.status(409).send(err.toString());
+  res.status(409).send({
+    success: 'false',
+    message: err.toString(),
+  });
 };
 
 // middleware to use for all requests

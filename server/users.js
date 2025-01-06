@@ -22,15 +22,29 @@ const connect = () => {
   })
 }
 
-exports.login = (user, password) => {
-
+exports.login = async (username, password) => {
+  return await new Promise(async (resolve, rejects) => {
+    if (username.length == 0 || password.length == 0) {
+      rejects(new Error(`No user or password were provided.`))
+    } else {
+      const user = {
+        username: username,
+        password: password
+      }
+      const res = await sql`
+        select ${sql(user, 'username', 'password')}
+        from users`
+      .then(r => resolve())
+      .catch(error => {rejects(new Error(error))})
+    }
+  })
 }
 
 
 exports.register = async (username, password)  => {
   return await new Promise(async (resolve, rejects) => {
     if (username.length == 0 || password.length == 0) {
-      rejects(new Error (`No user or password were provided.`))
+      rejects(new Error(`No user or password were provided.`))
     } else {
       const user = {
         username: username,
@@ -39,8 +53,8 @@ exports.register = async (username, password)  => {
       const res = await sql`insert into users ${
         sql(user, 'username', 'password')
       }`
-      console.log(res)
-      resolve();
+      .then(r => resolve())
+      .catch(error => {rejects(new Error(error))})
     }
   })
 }
