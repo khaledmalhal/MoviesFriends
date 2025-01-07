@@ -59,12 +59,37 @@ exports.register = async (username, password)  => {
   })
 }
 
-exports.getUser = (user) => {
-  return new Promise((resolve, rejects) => {
+exports.getUser = async (user) => {
+  return await new Promise(async (resolve, rejects) => {
     if (typeof user === 'undefined' || user.length == 0) {
       rejects(new Error(`The user cannot be empty`));
     } else {
+      const res = await sql`
+        select username
+        from users
+        where username = ${user}
+      `
+      .then(r => {
+        resolve(r)
+      })
+      .catch(error => rejects(new Error(error)));
+    }
+  })
 
+}
+
+exports.getFriends = async (user) => {
+  return await new Promise(async (resolve, rejects) => {
+    if (typeof user === 'undefined' || user.length === 0) {
+      rejects(new Error(`The user was not provided`));
+    } else {
+      const res = await sql`
+        select friend
+        from friends 
+        where username = ${user}
+      `
+      .then(r => resolve(r.map(Object.values)))
+      .catch(error => rejects(new Error(error)));
     }
   })
 }

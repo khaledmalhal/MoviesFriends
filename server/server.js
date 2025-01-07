@@ -12,16 +12,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 
-const user   = require('./users')
-// const movies = require('./movies')
+const userAPI   = require('./users')
+const moviesAPI = require('./movies')
 
+
+/***************
+ *    USERS    *
+ ***************/
 // POST /user/login
 const logInController = (req, res, next) => {
   let {username, password} = req.body;
   if (username.length == 0 || password.length == 0)
     throw Error(`Username or password are empty`)
 
-  user.login(username, password)
+  userAPI.login(username, password)
   .then(() => {
     res.status(201).send({
       success: 'true',
@@ -37,7 +41,7 @@ const registerController = (req, res, next) => {
   if (username.length == 0 || password.length == 0)
     throw Error(`Username or password are empty`)
 
-  user.register(username, password)
+  userAPI.register(username, password)
   .then(() => {
     res.status(201).send({
       success: 'true',
@@ -47,7 +51,52 @@ const registerController = (req, res, next) => {
   .catch(error => {next(Error(`User was not registered:\n${error}`))});
 }
 
+// GET /user/:user
+const getUserController = (req, res, next) => {
+  let user = req.params.user;
+  if (typeof user === 'undefined' || user.length === 0)
+    throw Error('User is not provided')
+
+  userAPI.getUser(user)
+  .then(user => {
+    res.status(201).send({
+      success: 'true',
+      message: user,
+    });
+  })
+  .catch(error => next(Error(`Couldn't get ${user}:\n${error}`)));
+}
+
+// GET /user/friends
+const getFriendsController = (req, res, next) => {
+  let user = req.params.user;
+  if (typeof user === 'undefined' || user.length === 0)
+    throw Error('User is not provided')
+
+  userAPI.getFriends(user)
+  .then(friends => {
+    res.status(201).send({
+      success: 'true',
+      message: friends,
+    });
+  })
+  .catch(error => next(Error(`Couldn't get ${user}'s friends:\n${error}`)));
+}
+
+/****************
+ *    MOVIES    *
+ ****************/
 // GET /movies/genres
+const getGenresController = (req, res, next) => {
+  moviesAPI.getGenres()
+  .then(genres => {
+    res.status(201).send({
+      success: 'true',
+      message: genres
+    });
+  })
+  .catch(error => next(Error(`Couldn't get genres:\n${error}`)));
+}
 
 
 const errorController = (err, req, res, next) => {
@@ -80,12 +129,18 @@ const headersController = (req, res, next) => {
 app.use(cors());
 
 // ROUTER
-app.use ('*',              logController);
-app.use ('*',              headersController);
+app.use ('*',                   logController);
+app.use ('*',                   headersController);
 
-app.post('/user/login',    logInController);
-app.post('/user/register', registerController);
 
+// USER ROUTER
+app.post('/user/login',         logInController);
+app.post('/user/register',      registerController);
+app.get ('/user/:user',         getUserController);
+app.get ('/user/friends/:user', getFriendsController);
+
+// MOVIES ROUTER
+app.get ('/movies/genres',      getGenresController);
 
 app.use(errorController);
 
