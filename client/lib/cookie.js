@@ -9,7 +9,7 @@ var Cookie = {
       date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
       expires = "expires=" + date.toGMTString() + ";";
     }
-    document.cookie = name + "=" + value + ";" + expires + "path=/";
+    document.cookie = name + "=" + value + ";" + expires + "path=/" + ';SameSite=None';
   },
 
   get: function (name) {

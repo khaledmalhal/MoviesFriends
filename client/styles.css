@@ -6,6 +6,25 @@ div.form-register, div.form-buttons {
   display: table-row;
 }
 
+.header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-items: stretch;
+  align-items: stretch;
+  column-gap: 20px;
+  row-gap: 20px;
+}
+
+.content {
+  color: #242424;
+  /*background-color: #f25fff;*/
+  font-weight: 600;
+  text-align: left;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 1px;
+}
+
 label, input {
   display: table-cell;
   margin-bottom: 10px;
@@ -13,4 +32,20 @@ label, input {
 
 label {
   padding-right: 10px;
+}
+
+button {
+  font-size: 20px;
+}
+
+button.logout-button {
+  margin-left: 90%;
+  margin-right: 0;
+  padding: 5px;
+  text-wrap-mode:nowrap;
+  /*padding-right: 20px;*/
+  /*padding-left:  20px;*/
+  justify-content: stretch;
+  /*border-right: 20px;*/
+  /*border-left:  20px;*/
 }
