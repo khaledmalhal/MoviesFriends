@@ -61,7 +61,7 @@ const getUserController = (req, res, next) => {
   .then(user => {
     res.status(201).send({
       success: 'true',
-      message: user,
+      user: user,
     });
   })
   .catch(error => next(Error(`Couldn't get ${user}:\n${error}`)));
@@ -77,7 +77,7 @@ const getFriendsController = (req, res, next) => {
   .then(friends => {
     res.status(201).send({
       success: 'true',
-      message: friends,
+      friends: friends,
     });
   })
   .catch(error => next(Error(`Couldn't get ${user}'s friends:\n${error}`)));
@@ -86,13 +86,29 @@ const getFriendsController = (req, res, next) => {
 /****************
  *    MOVIES    *
  ****************/
+// GET /movies/title/:title
+const getMoviesTitleController = (req, res, next) => {
+  let title = req.params.title;
+  if (typeof title === 'undefined' || title.length === 0)
+    throw Error('User is not provided')
+
+  moviesAPI.getMovies(title)
+  .then(movies => {
+    res.status(201).send({
+      success: 'true',
+      movies: movies,
+    });
+  })
+  .catch(error => next(Error(`Couldn't get movies with title ${title}:\n${error}`)));
+}
+
 // GET /movies/genres
 const getGenresController = (req, res, next) => {
   moviesAPI.getGenres()
   .then(genres => {
     res.status(201).send({
       success: 'true',
-      message: genres
+      genres: genres
     });
   })
   .catch(error => next(Error(`Couldn't get genres:\n${error}`)));
@@ -129,18 +145,19 @@ const headersController = (req, res, next) => {
 app.use(cors());
 
 // ROUTER
-app.use ('*',                   logController);
-app.use ('*',                   headersController);
+app.use ('*',                    logController);
+app.use ('*',                    headersController);
 
 
 // USER ROUTER
-app.post('/user/login',         logInController);
-app.post('/user/register',      registerController);
-app.get ('/user/:user',         getUserController);
-app.get ('/user/friends/:user', getFriendsController);
+app.post('/user/login',          logInController);
+app.post('/user/register',       registerController);
+app.get ('/user/:user',          getUserController);
+app.get ('/user/friends/:user',  getFriendsController);
 
 // MOVIES ROUTER
-app.get ('/movies/genres',      getGenresController);
+app.get ('/movies/title/:title', getMoviesTitleController);
+app.get ('/movies/genres',       getGenresController);
 
 app.use(errorController);
 

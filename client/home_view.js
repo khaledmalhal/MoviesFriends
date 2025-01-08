@@ -2,11 +2,12 @@
 
 $(function() {
 
-function Home(URL) {
-  this.url = URL;
+function Home(API_URL) {
+  this.url = API_URL;
   this.user = Cookie.get('user') ? JSON.parse(Cookie.get('user')) : '';
+  this.notallowed = ['login', 'register', 'friends']
 
-  Home.prototype.init = function() {
+  Home.prototype.showHomePage = function() {
     if (typeof this.user === 'undefined' || this.user.length === 0) {
       $('.home_body').html(`
       <div class="form">
@@ -24,24 +25,11 @@ function Home(URL) {
         </div>
       </div>`)
     }
-    else this.showHomePage()
+    else this.showMoviesPage()
   }
 
-  Home.prototype.showHomePage = function() {
-    $('.message').text(`User ${this.user} is logged in.`)
-    $('.home_body').html(`
-      <div class="header">
-        <div class="item">
-          <div class="content">
-            <p class="user-welcome">Welcome ${this.user}</p>
-          </div>
-        </div>
-        <div class="item">
-          <div class="content">
-            <button class="logout-button">Log out</button>
-          </div>
-        </div>
-      </div>`)
+  Home.prototype.showMoviesPage = function() {
+    window.location.href = './movies.html'
   }
 
   Home.prototype.register = function(username, password) {
@@ -49,20 +37,27 @@ function Home(URL) {
       username: username,
       password: password
     }
+    if (this.notallowed.includes(username)) {
+      $('.message').text(`Username ${username} is not allowed. It cannot be neither of these: ${this.notallowed.map((e) => (e)).join(', ')}`)
+      $('.user').val('');
+      $('.pass').val('');
+      return;
+    }
     $.ajax({
       method: 'GET',
       dataType: 'json',
-      url: this.url+'/user/'+username
+      url: this.url + username
     })
     .then(r => {
-      if (r.message[0].username == username) {
+      console.log(r)
+      if (r.message.length > 0 && r.message[0].username == username) {
         $('.message').text(`User ${username} already exists.`)
       }
       else {
         $.ajax({
           method: 'POST',
           dataType: 'json',
-          url: this.url+'/user/register',
+          url: this.url+'register',
           data: params
         })
         .then(r => {
@@ -83,14 +78,14 @@ function Home(URL) {
     $.ajax({
       method: 'POST',
       dataType: 'json',
-      url: this.url + '/user/login',
+      url: this.url + 'login',
       data: params
     })
     .then(r => {
       $('.message').text(r.message)
       this.user = username
       Cookie.set('user', JSON.stringify(this.user), 7)
-      this.showHomePage()
+      this.showMoviesPage()
     })
     .catch(error => {$('.message').text(JSON.parse(error.responseText).message)})
   }
@@ -99,7 +94,7 @@ function Home(URL) {
     Cookie.delete('user');
     let old = this.user;
     this.user = '';
-    this.init()
+    this.showHomePage()
     $('.message').text(`${old} just logged out`)
   }
 
@@ -108,8 +103,8 @@ function Home(URL) {
     $(document).on('click', '.login-submit',    () => this.login   ($('.user').val(), $('.pass').val()));
     $(document).on('click', '.logout-button',   () => this.logout());
   }
-  this.init()
+  this.showHomePage();
   this.eventsController();
 }
-let home = new Home('http://localhost:8000')
+let home = new Home('http://localhost:8000/user/')
 })
