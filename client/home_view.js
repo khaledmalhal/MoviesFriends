@@ -50,7 +50,7 @@ function Home(API_URL) {
     })
     .then(r => {
       console.log(r)
-      if (r.message.length > 0 && r.message[0].username == username) {
+      if (r.user.length > 0 && r.user[0].username == username) {
         $('.message').text(`User ${username} already exists.`)
       }
       else {
