@@ -20,8 +20,16 @@ $(function() {
       window.location.href = './index.html'
     }
 
-    Home.prototype.eventsController = function() {
+    Home.prototype.logout = function() {
+      Cookie.delete('user');
+      let old = this.user;
+      this.user = '';
+      this.showLoginPage()
+      $('.message').text(`${old} just logged out`)
+    }
 
+    Home.prototype.eventsController = function() {
+      $(document).on('click', '.blogout', () => this.logout());
     }
     this.eventsController()
   }

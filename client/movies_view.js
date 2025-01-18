@@ -13,22 +13,6 @@ function Movies(API_URL) {
       window.location.href = './index.html'
     } else {
       $('.message').text(`User ${this.user} is logged in.`)
-      $('.header').html(`
-        <div class="item">
-          <div class="content">
-            <p class="user-welcome">Welcome ${this.user}</p>
-          </div>
-        </div>
-        <div class="item">
-          <div class="content">
-            <button class="bfriends">Friends</button>
-          </div>
-        </div>
-        <div class="item">
-          <div class="content">
-            <button class="blogout">Log out</button>
-          </div>
-        </div>`)
       $('.movies_body').html(`
         <span class="nobr">
           <input type="text" class="search" value="${this.search}" placeholder="Search for a movie title" onfocus="let v=this.value; this.value=''; this.value=v">
@@ -111,10 +95,10 @@ function Movies(API_URL) {
   }
 
   Movies.prototype.eventsController = function() {
-    $(document).on('click',    'bsearch', ()  => {this.search = $('.search').val(); this.searchMovies()})
-    $(document).on('enterKey', '.search', ()  => {this.search = $('.search').val(); this.searchMovies()});
-    $(document).on('keypress', '.search', (e) => {if (e.keyCode === 13) $('.search').trigger("enterKey");});
-    $(document).on('click',    '.blogout',() => this.logout());
+    $(document).on('click',    '.bsearch', ()  => {this.search = $('.search').val(); this.searchMovies()})
+    $(document).on('enterKey', '.search',  ()  => {this.search = $('.search').val(); this.searchMovies()});
+    $(document).on('keypress', '.search',  (e) => {if (e.keyCode === 13) $('.search').trigger("enterKey");});
+    $(document).on('click',    '.blogout', ()  => this.logout());
   };
 
   this.showMoviesPage();

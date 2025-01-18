@@ -6,6 +6,11 @@ div.form-register, div.form-buttons {
   display: table-row;
 }
 
+nav.navbar {
+  padding-left: 10px;
+  padding-right: 20px;
+}
+
 .header {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
