@@ -8,7 +8,7 @@ div.form-register, div.form-buttons {
 
 .header {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   justify-items: stretch;
   align-items: stretch;
   column-gap: 20px;
@@ -39,7 +39,7 @@ button {
 }
 
 button.blogout {
-  margin-left: 90%;
+  margin-left: 0;
   margin-right: 0;
   padding: 5px;
   text-wrap-mode:nowrap;

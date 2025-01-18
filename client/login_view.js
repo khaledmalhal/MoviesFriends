@@ -25,11 +25,11 @@ function Login(API_URL) {
         </div>
       </div>`)
     }
-    else this.showMoviesPage()
+    else this.showHomePage()
   }
 
-  Login.prototype.showMoviesPage = function() {
-    window.location.href = './movies.html'
+  Login.prototype.showHomePage = function() {
+    window.location.href = './home.html'
   }
 
   Login.prototype.register = function(username, password) {
@@ -85,7 +85,7 @@ function Login(API_URL) {
       $('.message').text(r.message)
       this.user = username
       Cookie.set('user', JSON.stringify(this.user), 7)
-      this.showMoviesPage()
+      this.showHomePage()
     })
     .catch(error => {$('.message').text(JSON.parse(error.responseText).message)})
   }
@@ -99,8 +99,12 @@ function Login(API_URL) {
   }
 
   Login.prototype.eventsController = function() {
-    $(document).on('click', '.register-submit', () => this.register($('.user').val(), $('.pass').val()));
-    $(document).on('click', '.login-submit',    () => this.login   ($('.user').val(), $('.pass').val()));
+    $(document).on('click',    '.register-submit', ()  => this.register($('.user').val(), $('.pass').val()));
+    $(document).on('keypress', '.pass',            (e) => {if (e.keyCode === 13) $('.login-submit').trigger("enterKey");});
+    $(document).on('keypress', '.user',            (e) => {if (e.keyCode === 13) $('.login-submit').trigger("enterKey");});
+    $(document).on('enterKey', '.login-submit',    ()  => this.login   ($('.user').val(), $('.pass').val()));
+    $(document).on('click',    '.login-submit',    ()  => this.login   ($('.user').val(), $('.pass').val()));
+
     $(document).on('click', '.logout-button',   () => this.logout());
   }
   this.showLoginPage();

@@ -27,7 +27,6 @@ const logInController = (req, res, next) => {
 
   userAPI.getUser(username)
   .then(r => {
-    console.log(r)
     if (r == username) {
       userAPI.login(username, password)
       .then(() => {

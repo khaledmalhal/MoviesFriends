@@ -21,6 +21,11 @@ function Movies(API_URL) {
         </div>
         <div class="item">
           <div class="content">
+            <button class="bfriends">Friends</button>
+          </div>
+        </div>
+        <div class="item">
+          <div class="content">
             <button class="blogout">Log out</button>
           </div>
         </div>`)
