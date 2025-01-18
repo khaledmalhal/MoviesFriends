@@ -3,12 +3,14 @@
 /*jshint esversion: 6 */
 
 const postgres = require('postgres');
+const process  = require('process');
+require('dotenv/config');
 
-const host="localhost";
-const db="users"
-const port=5432;
-const username="kmalhal"
-const password="kmalhal"
+const host     = process.env.HOST;
+const db       = process.env.USER_DB;
+const port     = process.env.PORT;
+const username = process.env.USERNAME;
+const password = process.env.PASSWORD;
 
 let sql;
 

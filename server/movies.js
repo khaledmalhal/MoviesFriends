@@ -3,16 +3,20 @@
 /*jshint esversion: 6 */
 
 const postgres = require('postgres');
+const process  = require('process');
+require('dotenv').config();
 
-const host="localhost";
-const db="movies"
-const port=5432;
-const username="kmalhal"
-const password="kmalhal"
+console.log(process.env)
+const host     = process.env.HOST;
+const db       = process.env.MOVIES_DB;
+const port     = process.env.PORT;
+const username = process.env.USERNAME;
+const password = process.env.PASSWORD;
 
 let sql;
 
 const connect = async () => {
+  console.log(host + db)
   sql = postgres({
     host:     host,
     port:     port,
@@ -20,7 +24,6 @@ const connect = async () => {
     username: username,
     password: password,
   })
-  await sql`set search_path to movies`
 }
 
 exports.getMovies = async (title) => {
@@ -29,7 +32,7 @@ exports.getMovies = async (title) => {
     const res = await sql`
     select   movie_id, title, budget, homepage, overview,
              release_date, revenue, runtime, vote_average
-    from     movie
+    from     movies.movie
     where    lower(title) like ${'%'+title_low+'%'}
     ${sql`order by popularity DESC`}`
     .then(r => {
@@ -43,7 +46,7 @@ exports.getGenres = async () => {
   return await new Promise(async (resolve, rejects) => {
     const res = await sql`
       select genre_name
-      from genre`
+      from movies.genre`
     .then(r => resolve(r.map(Object.values)))
     .catch(error => {rejects(new Error(error))})
   })
