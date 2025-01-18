@@ -70,12 +70,12 @@ exports.getUser = async (user) => {
         where username = ${user}
       `
       .then(r => {
-        resolve(r)
+        if (r.length == 0) throw (new Error(`There is no user ${user}.`))
+        resolve(r[0].username)
       })
-      .catch(error => rejects(new Error(error)));
+      .catch(error => rejects(Error(error)));
     }
   })
-
 }
 
 exports.getFriends = async (user) => {
@@ -88,7 +88,9 @@ exports.getFriends = async (user) => {
         from friends 
         where username = ${user}
       `
-      .then(r => resolve(r.map(Object.values)))
+      .then(r => {
+        resolve(r.map((array) => {return array.friend}))}
+      )
       .catch(error => rejects(new Error(error)));
     }
   })

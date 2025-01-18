@@ -25,14 +25,23 @@ const logInController = (req, res, next) => {
   if (username.length == 0 || password.length == 0)
     throw Error(`Username or password are empty`)
 
-  userAPI.login(username, password)
-  .then(() => {
-    res.status(201).send({
-      success: 'true',
-      message: 'User logged in successfully',
-    });
+  userAPI.getUser(username)
+  .then(r => {
+    console.log(r)
+    if (r == username) {
+      userAPI.login(username, password)
+      .then(() => {
+        res.status(201).send({
+          success: 'true',
+          message: 'User logged in successfully',
+        });
+      })
+      .catch(error => {next(Error(`User cannot sign in:\n${error}`))});
+    } else {
+      throw Error(`User ${username} does not exist`)
+    }
   })
-  .catch(error => {next(Error(`User cannot sign in:\n${error}`))});  
+  .catch(error => {next(error)})
 }
 
 // POST /user/register
@@ -67,7 +76,7 @@ const getUserController = (req, res, next) => {
   .catch(error => next(Error(`Couldn't get ${user}:\n${error}`)));
 }
 
-// GET /user/friends
+// GET /friends/:user
 const getFriendsController = (req, res, next) => {
   let user = req.params.user;
   if (typeof user === 'undefined' || user.length === 0)
@@ -153,7 +162,9 @@ app.use ('*',                    headersController);
 app.post('/user/login',          logInController);
 app.post('/user/register',       registerController);
 app.get ('/user/:user',          getUserController);
-app.get ('/user/friends/:user',  getFriendsController);
+
+// FRIENDS ROUTER
+app.get ('/friends/:user',  getFriendsController);
 
 // MOVIES ROUTER
 app.get ('/movies/title/:title', getMoviesTitleController);
