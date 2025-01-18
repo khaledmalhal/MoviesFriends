@@ -2,14 +2,14 @@
 
 $(function() {
 
-function Home(API_URL) {
+function Login(API_URL) {
   this.url = API_URL;
   this.user = Cookie.get('user') ? JSON.parse(Cookie.get('user')) : '';
   this.notallowed = ['login', 'register', 'friends']
 
-  Home.prototype.showHomePage = function() {
+  Login.prototype.showLoginPage = function() {
     if (typeof this.user === 'undefined' || this.user.length === 0) {
-      $('.home_body').html(`
+      $('.login_body').html(`
       <div class="form">
         <div class="form-register">
           <label for="username">Username: </label>
@@ -28,11 +28,11 @@ function Home(API_URL) {
     else this.showMoviesPage()
   }
 
-  Home.prototype.showMoviesPage = function() {
+  Login.prototype.showMoviesPage = function() {
     window.location.href = './movies.html'
   }
 
-  Home.prototype.register = function(username, password) {
+  Login.prototype.register = function(username, password) {
     let params = {
       username: username,
       password: password
@@ -70,7 +70,7 @@ function Home(API_URL) {
     .catch((error => {$('.message').text(JSON.parse(error.responseText).message)}))
   }
 
-  Home.prototype.login = function (username, password) {
+  Login.prototype.login = function (username, password) {
     let params = {
       username: username,
       password: password
@@ -90,21 +90,21 @@ function Home(API_URL) {
     .catch(error => {$('.message').text(JSON.parse(error.responseText).message)})
   }
 
-  Home.prototype.logout = function() {
+  Login.prototype.logout = function() {
     Cookie.delete('user');
     let old = this.user;
     this.user = '';
-    this.showHomePage()
+    this.showLoginPage()
     $('.message').text(`${old} just logged out`)
   }
 
-  Home.prototype.eventsController = function() {
+  Login.prototype.eventsController = function() {
     $(document).on('click', '.register-submit', () => this.register($('.user').val(), $('.pass').val()));
     $(document).on('click', '.login-submit',    () => this.login   ($('.user').val(), $('.pass').val()));
     $(document).on('click', '.logout-button',   () => this.logout());
   }
-  this.showHomePage();
+  this.showLoginPage();
   this.eventsController();
 }
-let home = new Home('http://localhost:8000/user/')
+let login = new Login('http://localhost:8000/user/')
 })

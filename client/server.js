@@ -11,7 +11,6 @@ const server = http.createServer((req, res) => {
     let ext = filename.split('.').pop()
 
     if (filename == './') {
-        console.log('root file')
         filename = './index.html'
         ext = 'html'
     }
