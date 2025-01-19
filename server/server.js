@@ -35,7 +35,7 @@ const logInController = (req, res, next) => {
           message: 'User logged in successfully',
         });
       })
-      .catch(error => {next(Error(`User cannot sign in:\n${error}`))});
+      .catch(error => {next(error)});
     } else {
       throw Error(`User ${username} does not exist`)
     }
@@ -49,14 +49,21 @@ const registerController = (req, res, next) => {
   if (username.length == 0 || password.length == 0)
     throw Error(`Username or password are empty`)
 
-  userAPI.register(username, password)
-  .then(() => {
-    res.status(201).send({
-      success: 'true',
-      message: 'User registered successfully',
-    });
+  userAPI.getUser(username)
+  .then(r => {
+    if (r == username)
+      throw Error(`User ${username} already exists.`)
   })
-  .catch(error => {next(Error(`User was not registered:\n${error}`))});
+  .catch(r => {
+    userAPI.register(username, password)
+    .then(() => {
+      res.status(201).send({
+        success: 'true',
+        message: 'User registered successfully',
+      });
+    })
+    .catch(error => {next(Error(`User was not registered:\n${error}`))});
+  })
 }
 
 // GET /user/:user

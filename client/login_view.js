@@ -80,6 +80,7 @@ function Login(API_URL) {
   }
 
   Login.prototype.login = function (username, password) {
+    $('.login-message').text('')
     let params = {
       username: username,
       password: password

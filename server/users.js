@@ -34,10 +34,18 @@ exports.login = async (username, password) => {
         password: password
       }
       const res = await sql`
-        select ${sql(user, 'username', 'password')}
-        from users`
+        select username, password
+        from users
+        where username = ${username}`
       .then(r => {
         console.log(r)
+        if (r.length == 0)
+          rejects(new Error(`User ${username} does not exist`))
+        if (r[0].username === username) {
+          if (r[0].password !== password)
+            rejects(new Error(`Password doesn't match`))
+        }
+        else rejects(new Error(`Error at login in.`))
         resolve()
       })
       .catch(error => {rejects(new Error(error))})
