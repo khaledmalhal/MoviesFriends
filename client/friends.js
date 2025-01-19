@@ -12,16 +12,10 @@ $(function() {
         window.location.href = './index.html'
       } else {
         $('.friends-body-search').html(`
-          <div class="row g-3 align-items-end">
-            <form>
-              <div>
-                <label for="friend-search">Add an user</label>
-                <input type="text" class="friend-search form-control" id="friend-search" placeholder="Username">
-              </div>
-              </form>
-            <div>
-              <label class="friend-search-msg"></label>
-            </div>
+          <div class="row g-2 align-items-end">
+            <label for="friend-search">Add an user</label>
+            <input type="text" class="friend-search form-control" id="friend-search" placeholder="Username">
+            <label class="friend-search-msg"></label>
             <div class="col-auto">
               <button class="btn btn-primary mb-3 add-friend">Add friend</button>
             </div>
