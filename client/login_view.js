@@ -10,18 +10,27 @@ function Login(API_URL) {
   Login.prototype.showLoginPage = function() {
     if (typeof this.user === 'undefined' || this.user.length === 0) {
       $('.login_body').html(`
-      <div class="form">
-        <div class="form-register">
-          <label for="username">Username: </label>
-          <input type="text" name='username' class='user' required/><br>
-        </div>
-        <div class="form-register">
-          <label for="username">Password: </label>
-          <input type="password" name='password' class='pass' required/>
-        </div>
-        <div class="form-buttons">
-          <button class="register-submit">Register</button>
-          <button class="login-submit">Log in</button>
+      <p class="fs-1 text-center">MoviesFriends</p>
+      <p class="fs-4 text-center">Start sharing your favorite movies with your friends over the internet!</p>
+      <div class="bg-info min-vw-100 min-vh-100"></div>
+        <div class="position-absolute top-50 start-50 translate-middle border rounded min-vw-50 vw-50 p-3 bg-light">
+          <form style="width: 300px;">
+            <div class="mb-3">
+              <label for="username-input" class="form-label">Username</label>
+              <input type="text" class="form-control user" id="username-input">
+            </div>
+            <div class="mb-3">
+              <label for="password-input" class="form-label">Password</label>
+              <input type="password" class="form-control pass" id="password-input">
+            </div>
+            <div class="mb-3">
+              <label class="login-message" style="color: red;"></label>
+            </div>
+          </form>
+          <div>
+            <button class="btn btn-outline-primary register-submit">Register</button>
+            <button class="btn btn-primary login-submit">Log in</button>
+          </div>
         </div>
       </div>`)
     }
@@ -38,7 +47,7 @@ function Login(API_URL) {
       password: password
     }
     if (this.notallowed.includes(username)) {
-      $('.message').text(`Username ${username} is not allowed. It cannot be neither of these: ${this.notallowed.map((e) => (e)).join(', ')}`)
+      $('.login-message').text(`Username ${username} is not allowed. It cannot be neither of these: ${this.notallowed.map((e) => (e)).join(', ')}`)
       $('.user').val('');
       $('.pass').val('');
       return;
@@ -51,7 +60,7 @@ function Login(API_URL) {
     .then(r => {
       console.log(r)
       if (r.user.length > 0 && r.user[0].username == username) {
-        $('.message').text(`User ${username} already exists.`)
+        $('.login-message').text(`User ${username} already exists.`)
       }
       else {
         $.ajax({
@@ -61,13 +70,13 @@ function Login(API_URL) {
           data: params
         })
         .then(r => {
-          $('.message').text(r.message)
+          $('.login-message').text(r.message)
           this.login(username, password)
         })
-        .catch(error => {$('.message').text(JSON.parse(error.responseText).message)})
+        .catch(error => {$('.login-message').text(JSON.parse(error.responseText).message)})
       }
     })
-    .catch((error => {$('.message').text(JSON.parse(error.responseText).message)}))
+    .catch((error => {$('.login-message').text(JSON.parse(error.responseText).message)}))
   }
 
   Login.prototype.login = function (username, password) {
@@ -82,12 +91,11 @@ function Login(API_URL) {
       data: params
     })
     .then(r => {
-      $('.message').text(r.message)
       this.user = username
       Cookie.set('user', JSON.stringify(this.user), 7)
       this.showHomePage()
     })
-    .catch(error => {$('.message').text(JSON.parse(error.responseText).message)})
+    .catch(error => {$('.login-message').text(JSON.parse(error.responseText).message)})
   }
 
   Login.prototype.logout = function() {
@@ -95,7 +103,7 @@ function Login(API_URL) {
     let old = this.user;
     this.user = '';
     this.showLoginPage()
-    $('.message').text(`${old} just logged out`)
+    $('.login-message').text(`${old} just logged out`)
   }
 
   Login.prototype.eventsController = function() {

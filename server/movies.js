@@ -6,7 +6,6 @@ const postgres = require('postgres');
 const process  = require('process');
 require('dotenv').config();
 
-console.log(process.env)
 const host     = process.env.HOST;
 const db       = process.env.MOVIES_DB;
 const port     = process.env.PORT;
@@ -16,7 +15,6 @@ const password = process.env.PASSWORD;
 let sql;
 
 const connect = async () => {
-  console.log(host + db)
   sql = postgres({
     host:     host,
     port:     port,

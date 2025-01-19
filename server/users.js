@@ -36,7 +36,10 @@ exports.login = async (username, password) => {
       const res = await sql`
         select ${sql(user, 'username', 'password')}
         from users`
-      .then(r => resolve())
+      .then(r => {
+        console.log(r)
+        resolve()
+      })
       .catch(error => {rejects(new Error(error))})
     }
   })
