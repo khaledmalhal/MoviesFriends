@@ -127,4 +127,20 @@ exports.addFriend = async (user, friend) => {
   })
 }
 
+exports.removeFriend = async (user, friend) => {
+  return await new Promise(async (resolve, rejects) => {
+    if (typeof user   === 'undefined' || user.length === 0 ||
+        typeof friend === 'undefined' || friend.length === 0) {
+      rejects(new Error(`Users are not valid`));
+    } else {
+      const res = await sql`
+      delete from friends
+      where username = ${user} and
+            friend   = ${friend}`
+      .then(r => resolve())
+      .catch(error => {rejects(new Error(`Error at deleting friend.`))})
+    }
+  })
+}
+
 connect()

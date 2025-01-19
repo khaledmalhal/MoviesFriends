@@ -34,7 +34,12 @@ $(function() {
         <ul class="list-group">
       ` +
       list.reduce((ac, friend) => ac +=
-      `<li class="list-group-item">${friend}</li>\n`, 
+      `<li class="list-group-item" friend="${friend}">
+        <div class="d-flex justify-content-between align-items-center">
+          <label>${friend}</label>
+          <button type="submit" class="delete btn btn-outline-danger" friend="${friend}">Delete</button>
+        </div>
+      </li>\n`, 
       "") + `</ul>`
     }
 
@@ -68,20 +73,47 @@ $(function() {
         $('.friend-search-msg').addClass('text-success');
         $('.friend-search-msg').removeClass('text-danger');
         $('.friend-search-msg').text(`${r.message}`);
+        this.listFriends();
       })
       .catch(r => {
         $('.friend-search-msg').removeClass('text-success');
         $('.friend-search-msg').addClass('text-danger');
         $('.friend-search-msg').text(`${r.responseJSON.message}`);
       })
-      this.listFriends();
       $('.friend-search').val('');
+    }
+
+    Friends.prototype.deleteFriend = function(friend) {
+      console.log(`Deleting friend ${friend}`)
+      const params = {
+        username: this.user,
+        friend: friend
+      }
+      $.ajax({
+        method: 'DELETE',
+        dataType: 'json',
+        url: this.url+'delete',
+        data: params
+      })
+      .then(r => {
+        $('.friend-search-msg').addClass('text-success');
+        $('.friend-search-msg').removeClass('text-danger');
+        $('.friend-search-msg').text(`${r.message}`);
+        this.listFriends();
+      })
+      .catch(r => {
+        $('.friend-search-msg').removeClass('text-success');
+        $('.friend-search-msg').addClass('text-danger');
+        $('.friend-search-msg').text(`${r.responseJSON.message}`);
+      })
+        $('.friend-search').val('');
     }
 
     Friends.prototype.eventsController = function() {
       $(document).on('click',    '.add-friend',    ()  => this.addFriend($('.friend-search').val()));
       $(document).on('enterKey', '.add-friend',    ()  => this.addFriend($('.friend-search').val()));
       $(document).on('keypress', '.friend-search', (e) => {if (e.keyCode === 13) $('.add-friend').trigger("enterKey");});
+      $(document).on('click',    '.delete',        (e) => this.deleteFriend($(e.currentTarget).attr('friend')));
     }
 
     this.eventsController()

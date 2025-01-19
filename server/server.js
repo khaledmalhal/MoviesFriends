@@ -105,7 +105,7 @@ const addFriendsController = (req, res, next) => {
     throw Error(`Username or friend are empty.`)
   if (username == friend)
     throw Error(`You can't add yourself as a friend.`)
-  
+
   userAPI.getUser(username)
   .then(r1 => {
     if (r1 == username) {
@@ -117,6 +117,36 @@ const addFriendsController = (req, res, next) => {
             res.status(201).send({
               success: 'true',
               message: 'Friend added successfully',
+            });
+          })
+          .catch(error => {next(error)});
+        }
+      })
+      .catch(error => {next(new Error(`User ${friend} does not exist.`))});
+    }
+  })
+  .catch(error => {next(new Error(`User ${username} does not exist.`))});
+}
+
+// DELETE /friends/delete
+const deleteFriendsController = (req, res, next) => {
+  let {username, friend} = req.body;
+  if (username.length == 0 || friend.length == 0)
+    throw Error(`Username or friend are empty.`)
+  if (username == friend)
+    throw Error(`You can't remove yourself as a friend.`)
+
+  userAPI.getUser(username)
+  .then(r1 => {
+    if (r1 == username) {
+      userAPI.getUser(friend)
+      .then(r2 => {
+        if (r2 == friend) {
+          userAPI.removeFriend(username, friend)
+          .then(() => {
+            res.status(201).send({
+              success: 'true',
+              message: 'Friend removed successfully',
             });
           })
           .catch(error => {next(error)});
@@ -200,8 +230,9 @@ app.post('/user/register',       registerController);
 app.get ('/user/:user',          getUserController);
 
 // FRIENDS ROUTER
-app.get ('/friends/:user',  getFriendsController);
-app.post('/friends/add',    addFriendsController);
+app.get   ('/friends/:user',     getFriendsController);
+app.post  ('/friends/add',       addFriendsController);
+app.delete('/friends/delete',    deleteFriendsController);
 
 // MOVIES ROUTER
 app.get ('/movies/title/:title', getMoviesTitleController);
