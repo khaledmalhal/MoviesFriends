@@ -38,7 +38,6 @@ exports.login = async (username, password) => {
         from users
         where username = ${username}`
       .then(r => {
-        console.log(r)
         if (r.length == 0)
           rejects(new Error(`User ${username} does not exist`))
         if (r[0].username === username) {
@@ -48,7 +47,7 @@ exports.login = async (username, password) => {
         else rejects(new Error(`Error at login in.`))
         resolve()
       })
-      .catch(error => {rejects(new Error(error))})
+      .catch(error => {rejects(new Error(`Error at login in.`))})
     }
   })
 }
@@ -105,6 +104,25 @@ exports.getFriends = async (user) => {
         resolve(r.map((array) => {return array.friend}))}
       )
       .catch(error => rejects(new Error(error)));
+    }
+  })
+}
+
+exports.addFriend = async (user, friend) => {
+  return await new Promise(async (resolve, rejects) => {
+    if (typeof user   === 'undefined' || user.length === 0 ||
+        typeof friend === 'undefined' || friend.length === 0) {
+      rejects(new Error(`Users are not valid`));
+    } else {
+      const friends = {
+        username: user,
+        friend: friend
+      }
+      const res = await sql`
+      insert into friends ${
+        sql(friends, 'username', 'friend')}`
+      .then(r => resolve())
+      .catch(error => {rejects(new Error(`Error at adding friend.`))})
     }
   })
 }

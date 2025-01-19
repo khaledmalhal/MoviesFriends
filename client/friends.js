@@ -11,31 +11,82 @@ $(function() {
         Cookie.delete('user');
         window.location.href = './index.html'
       } else {
-        $('.message').text(`User ${this.user} is logged in.`)
-        $('.home-header').html(`
-          <div class="item">
-            <div class="content">
-              <p class="user-welcome">Welcome ${this.user}</p>
+        $('.friends-body-search').html(`
+          <div class="row g-3 align-items-end">
+            <form>
+              <div>
+                <label for="friend-search">Add an user</label>
+                <input type="text" class="friend-search form-control" id="friend-search" placeholder="Username">
+              </div>
+              </form>
+            <div>
+              <label class="friend-search-msg"></label>
             </div>
-          </div>
-          <div class="item">
-            <div class="content">
-              <button class="blogout">Log out</button>
+            <div class="col-auto">
+              <button class="btn btn-primary mb-3 add-friend">Add friend</button>
             </div>
           </div>`)
-        $('.friends_body').html(`
-
-          `)
       }
     }
 
-    Friends.prototype.listFriends = function() {
+    Friends.prototype.friendList = function(list) {
+      return `
+        <ul class="list-group">
+      ` +
+      list.reduce((ac, friend) => ac +=
+      `<li class="list-group-item">${friend}</li>\n`, 
+      "") + `</ul>`
+    }
 
+    Friends.prototype.listFriends = function() {
+      $.ajax({
+        method: 'GET',
+        dataType: 'json',
+        url: this.url+this.user
+      })
+      .then(r => {
+        $('.friends-body-list').html(this.friendList(r.friends))
+      })
+      .catch(() => {
+        $('.friends-body-list').html('')
+      })
+    }
+
+    Friends.prototype.addFriend = function(friend) {
+      console.log(friend)
+      const params = {
+        username: this.user,
+        friend: friend
+      }
+      $.ajax({
+        method: 'POST',
+        dataType: 'json',
+        url: this.url+'add',
+        data: params
+      })
+      .then(r => {
+        $('.friend-search-msg').addClass('text-success');
+        $('.friend-search-msg').removeClass('text-danger');
+        $('.friend-search-msg').text(`${r.message}`);
+      })
+      .catch(r => {
+        $('.friend-search-msg').removeClass('text-success');
+        $('.friend-search-msg').addClass('text-danger');
+        $('.friend-search-msg').text(`${r.responseJSON.message}`);
+      })
+      this.listFriends();
+      $('.friend-search').val('');
     }
 
     Friends.prototype.eventsController = function() {
-      
+      $(document).on('click',    '.add-friend',    ()  => this.addFriend($('.friend-search').val()));
+      $(document).on('enterKey', '.add-friend',    ()  => this.addFriend($('.friend-search').val()));
+      $(document).on('keypress', '.friend-search', (e) => {if (e.keyCode === 13) $('.add-friend').trigger("enterKey");});
     }
+
+    this.eventsController()
+    this.showFriendsPage()
+    this.listFriends()
   }
   let friends = new Friends('http://localhost:8000/friends/')
 })

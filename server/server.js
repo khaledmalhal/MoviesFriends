@@ -98,6 +98,36 @@ const getFriendsController = (req, res, next) => {
   .catch(error => next(Error(`Couldn't get ${user}'s friends:\n${error}`)));
 }
 
+// POST /friends/add
+const addFriendsController = (req, res, next) => {
+  let {username, friend} = req.body;
+  if (username.length == 0 || friend.length == 0)
+    throw Error(`Username or friend are empty.`)
+  if (username == friend)
+    throw Error(`You can't add yourself as a friend.`)
+  
+  userAPI.getUser(username)
+  .then(r1 => {
+    if (r1 == username) {
+      userAPI.getUser(friend)
+      .then(r2 => {
+        if (r2 == friend) {
+          userAPI.addFriend(username, friend)
+          .then(() => {
+            res.status(201).send({
+              success: 'true',
+              message: 'Friend added successfully',
+            });
+          })
+          .catch(error => {next(error)});
+        }
+      })
+      .catch(error => {next(new Error(`User ${friend} does not exist.`))});
+    }
+  })
+  .catch(error => {next(new Error(`User ${username} does not exist.`))});
+}
+
 /****************
  *    MOVIES    *
  ****************/
@@ -171,6 +201,7 @@ app.get ('/user/:user',          getUserController);
 
 // FRIENDS ROUTER
 app.get ('/friends/:user',  getFriendsController);
+app.post('/friends/add',    addFriendsController);
 
 // MOVIES ROUTER
 app.get ('/movies/title/:title', getMoviesTitleController);
