@@ -57,6 +57,21 @@ exports.getMovies = async (title) => {
   })
 }
 
+exports.getFavoritesFromUser = async (user) => {
+  return await new Promise(async (resolve, rejects) => {
+    const res = await sql`
+    select     m.movie_id, m.title, m.budget, m.homepage, m.overview,
+               m.release_date, m.revenue, m.runtime, m.vote_average
+    from       movies.movie m
+    inner join favorites f on f.movie_id = m.movie_id
+    where      f.username = ${user}`
+    .then(r => {
+      resolve(r)
+    })
+    .catch(error => rejects(error))
+  })
+}
+
 exports.addFavorites = async (user, movie_id) => {
   return await new Promise(async (resolve, rejects) => {
     const favorite = {

@@ -189,6 +189,26 @@ const getGenresController = (req, res, next) => {
   .catch(error => next(Error(`Couldn't get genres:\n${error}`)));
 }
 
+// GET /movies/favorite/:user
+const getFavoritesController = (req, res, next) => {
+  let user = req.params.user
+
+  userAPI.getUser(user)
+  .then(r => {
+    if (r !== user)
+      throw(Error('User does not exist'))
+    moviesAPI.getFavoritesFromUser(user)
+    .then(r => {
+      res.status(201).send({
+        success: 'true',
+        favorites: r
+      });
+    })
+    .catch(error => {next(error)});
+  })
+  .catch(error => {next(error)})
+}
+
 // POST /movies/favorite/add
 const addFavoriteMovieController = (req, res, next) => {
   let {username, movie_id} = req.body;
@@ -264,7 +284,8 @@ app.get ('/movies/title/:title', getMoviesTitleController);
 app.get ('/movies/genres',       getGenresController);
 
 // FAVORITES ROUTER
-app.post('/movies/favorite/add', addFavoriteMovieController);
+app.get ('/movies/favorite/:user', getFavoritesController);
+app.post('/movies/favorite/add',   addFavoriteMovieController);
 
 
 app.use(errorController);
