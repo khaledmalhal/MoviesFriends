@@ -14,11 +14,12 @@ function Movies(API_URL) {
     } else {
       $('.message').text(`User ${this.user} is logged in.`)
       $('.movies_body').html(`
-        <span class="nobr">
-          <input type="text" class="search" value="${this.search}" placeholder="Search for a movie title" onfocus="let v=this.value; this.value=''; this.value=v">
-          <input type='button' class='bsearch' value='Search'></input>
-        </span>
-        <table class="movies_table"></table>`)
+        <div class="row row-gap-2 m-3">
+          <input type="text"   class="col-auto m-2 w-25 search form-control" value="${this.search}" placeholder="Search for a movie title" onfocus="let v=this.value; this.value=''; this.value=v">
+          <input type="button" class="col-auto m-2 btn btn-primary justify-content-center" value="Search"></input>
+        </div>
+        <hr>
+        <div class="movies-list"></div>`)
       this.searchMovies();
     }
   };
@@ -26,7 +27,7 @@ function Movies(API_URL) {
   Movies.prototype.searchMovies = function() {
     if (typeof this.search === 'undefined' || this.search.length === 0) {
       Cookie.delete('search')
-      this.fillTable([])
+      $('.movies-list').html(this.listMovies([]))
       return;
     }
     Cookie.set('search', JSON.stringify(this.search), 7);
@@ -37,53 +38,57 @@ function Movies(API_URL) {
     })
     .then(r => {
       if (r.movies.length > 0) {
-        this.fillTable(r.movies)
+        $('.movies-list').html(this.listMovies(r.movies))
       }
-      $('.message').text('')
     })
-    .catch(error => {$('.message').text(JSON.parse(error.responseText).message)})
+    .catch(error => {/* $('.message').text(JSON.parse(error.responseText).message)*/})
   };
 
-  Movies.prototype.fillTable = function(movies) {
-    let table = $('.movies_table')
+  Movies.prototype.listMovies = function(movies) {
     if (movies.length === 0) {
-      table.html(``)
-      return;
+      return ''
     }
-    table.html(`
-      <thead>
-        <tr>
-          <th scope='col'>Title</th>
-          <th scope='col'>Sinopsis</th>
-          <th scope='col'>Release Date</th>
-          <th scope='col'>Homepage</th>
-          <th scope='col'>Runtime</th>
-          <th scope='col'>Budget</th>
-          <th scope='col'>Revenue</th>
-          <th scope='col'>Vote average</th>
-        </tr>
-      </thead>`)
-    let body = $('<tbody></tbody>')
-    movies.forEach(movie => {
-      console.log(movie.homepage)
-      let homepage = movie.homepage
-      let release_date = movie.release_date.split('T')[0];
-      let row = $('<tr></tr>')
-      row.append($(`<th scope='row'>${movie.title}</th>`))
-      row.append($(`<td>${movie.overview}</td>`))
-      row.append($(`<td>${release_date}</td>`))
-      if (typeof homepage === undefined || homepage.length === 0)
-        row.append($(`<td>--</td>`))
-      else
-        row.append($(`<td><a target='_blank' href='${homepage}'>🔗</a></td>`))
-      row.append($(`<td>${movie.runtime} minutes</td>`))
-      row.append($(`<td>$${movie.budget}</td>`))
-      row.append($(`<td>$${movie.revenue}</td>`))
-      row.append($(`<td>${movie.vote_average}/10</td>`))
-      body.append(row)
-    });
-    table.append(body)
-  };
+    return `
+    <div class="container-fluid d-flex justify-content-between">
+      <div class="row">` +
+    movies.reduce((ac, movie) => ac += `
+    <div class="col p-3">
+      <div class="card min-vw-25" style="width: 25vw; min-width: 350px;">
+        <div class="card-body">
+          <h5 class="card-title">${movie.title}</h5>
+          <hr>
+          <p class="card-text">Release date: ${movie.release_date.split('T')[0]}</p>
+          <p class="card-text">Homepage: 
+            <a href="${movie.homepage}">${movie.homepage}</a>
+          </p>
+          <p class="card-text">Runtime: ${movie.runtime} minutes</p>
+          <p class="card-text">Budget: $${movie.budget}</p>
+          <p class="card-text">Revenue: $${movie.revenue}</p>
+          <p class="card-text">Vote average: ${movie.vote_average}/10</p>
+          <div class="d-flex justify-content-evenly m-1">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sinopsis-${movie.movie_id}">
+              Sinopsis
+            </button>
+            <button type="button" class="btn btn-success" id="add-movie-${movie.movie_id}">
+              Add to favorites
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="sinopsis-${movie.movie_id}" tabindex="-1" aria-labelledby="sinopsis-${movie.movie_id}-label" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="sinopsis-${movie.movie_id}-label">${movie.title}</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">${movie.overview}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    `, "") + `</div></div>`
+  }
 
   Movies.prototype.logout = function() {
     Cookie.delete('user');
@@ -91,7 +96,6 @@ function Movies(API_URL) {
     let old = this.user;
     this.user = '';
     this.showMoviesPage()
-    $('.message').text(`${old} just logged out`)
   }
 
   Movies.prototype.eventsController = function() {
