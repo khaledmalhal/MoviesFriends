@@ -6,6 +6,7 @@ function Movies(API_URL) {
   this.url    = API_URL;
   this.user   = Cookie.get('user')   ? JSON.parse(Cookie.get('user'))   : '';
   this.search = Cookie.get('search') ? JSON.parse(Cookie.get('search')) : '';
+  this.favorites = [];
 
   Movies.prototype.showMoviesPage = function() {
     if (typeof this.user === 'undefined' || this.user.length === 0) {
@@ -30,6 +31,8 @@ function Movies(API_URL) {
       $('.movies-list').html(this.listMovies([]))
       return;
     }
+    this.getFavorites();
+
     Cookie.set('search', JSON.stringify(this.search), 7);
     $.ajax({
       method: 'GET',
@@ -37,7 +40,6 @@ function Movies(API_URL) {
       url: this.url+'title/'+this.search
     })
     .then(r => {
-      console.log(`Got ${r.movies.length} movies`)
       if (r.movies.length > 0) {
         $('.movies-msg').text('')
         $('.movies-list').html(this.listMovies(r.movies))
@@ -54,6 +56,7 @@ function Movies(API_URL) {
     if (movies.length === 0) {
       return ''
     }
+    console.log(this.favorites)
     return `
     <div class="container-fluid d-flex justify-content-between">
       <div class="row">` +
@@ -75,9 +78,14 @@ function Movies(API_URL) {
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sinopsis-${movie.movie_id}">
               Sinopsis
             </button>
-            <button type="button" class="btn btn-success add-movie" movie-id="${movie.movie_id}" add-movie-${movie.movie_id}">
+            ${this.favorites.some(el => el.movie_id === movie.movie_id) ?
+            `<button type="button" class="btn btn-danger remove-movie" movie-id="${movie.movie_id}" remove-movie-${movie.movie_id}">
+              Remove from favorites
+            </button>` :
+            `<button type="button" class="btn btn-success add-movie" movie-id="${movie.movie_id}" add-movie-${movie.movie_id}">
               Add to favorites
-            </button>
+            </button>`
+            }
           </div>
         </div>
       </div>
@@ -96,6 +104,36 @@ function Movies(API_URL) {
     `, "") + `</div></div>`
   }
 
+  Movies.prototype.getFavorites = function() {
+    if (typeof this.user === 'undefined' || this.user.length === 0) {
+      $('.movies-msg').removeClass('text-success');
+      $('.movies-msg').addClass('text-danger');
+      $('.movies-msg').text(`Error with user. Try reloading the page.`)
+    }
+    $.ajax({
+      method: 'GET',
+      dataType: 'json',
+      url: this.url+'favorite/'+this.user
+    })
+    .then(r => {
+      if (Object.hasOwn(r, 'favorites')) {
+        console.log(r.favorites)
+        // this.favorites.length = 0
+        // r.favorites.forEach(element => {
+        //   this.favorites.push(element)
+        // });
+        this.favorites = r.favorites.map((favorite) => favorite)
+      }
+    })
+    .catch(error => {
+      console.log(error)
+      $('.movies-msg').removeClass('text-success');
+      $('.movies-msg').addClass('text-danger');
+      $('.movies-msg').text(`Error at getting ${this.user}'s favorite movies.`)
+      return []
+    })
+  }
+
   Movies.prototype.addFavorite = function(movie_id) {
     const params = {
       username: this.user,
@@ -111,6 +149,7 @@ function Movies(API_URL) {
       $('.movies-msg').addClass('text-success');
       $('.movies-msg').removeClass('text-danger');
       $('.movies-msg').text(`${r.message}`);
+      this.searchMovies();
     })
     .catch(error => {
       $('.movies-msg').removeClass('text-success');
