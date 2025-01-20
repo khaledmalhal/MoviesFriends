@@ -79,10 +79,10 @@ function Movies(API_URL) {
               Sinopsis
             </button>
             ${this.favorites.some(el => el.movie_id === movie.movie_id) ?
-            `<button type="button" class="btn btn-danger remove-movie" movie-id="${movie.movie_id}" remove-movie-${movie.movie_id}">
+            `<button type="button" class="btn btn-danger remove-movie" movie-id="${movie.movie_id}" id="remove-movie-${movie.movie_id}">
               Remove from favorites
             </button>` :
-            `<button type="button" class="btn btn-success add-movie" movie-id="${movie.movie_id}" add-movie-${movie.movie_id}">
+            `<button type="button" class="btn btn-success add-movie" movie-id="${movie.movie_id}" id="add-movie-${movie.movie_id}">
               Add to favorites
             </button>`
             }
@@ -149,7 +149,31 @@ function Movies(API_URL) {
       $('.movies-msg').addClass('text-success');
       $('.movies-msg').removeClass('text-danger');
       $('.movies-msg').text(`${r.message}`);
-      this.searchMovies();
+      setTimeout(this.searchMovies(), 500)
+    })
+    .catch(error => {
+      $('.movies-msg').removeClass('text-success');
+      $('.movies-msg').addClass('text-danger');
+      $('.movies-msg').text(`${error.responseJSON.message}`);
+    })
+  }
+
+  Movies.prototype.removeFavorite = function(movie_id) {
+    const params = {
+      username: this.user,
+      movie_id: movie_id
+    }
+    $.ajax({
+      method: 'DELETE',
+      dataType: 'json',
+      url: this.url+'favorite/delete',
+      data: params
+    })
+    .then(r => {
+      $('.movies-msg').addClass('text-success');
+      $('.movies-msg').removeClass('text-danger');
+      $('.movies-msg').text(`${r.message}`);
+      setTimeout(this.searchMovies(), 500)
     })
     .catch(error => {
       $('.movies-msg').removeClass('text-success');
@@ -167,11 +191,13 @@ function Movies(API_URL) {
   }
 
   Movies.prototype.eventsController = function() {
-    $(document).on('click',    '.bsearch',   ()  => {this.search = $('.search').val(); this.searchMovies()})
-    $(document).on('enterKey', '.search',    ()  => {this.search = $('.search').val(); this.searchMovies()});
-    $(document).on('keypress', '.search',    (e) => {if (e.keyCode === 13) $('.search').trigger("enterKey");});
-    $(document).on('click',    '.add-movie', (e) => this.addFavorite($(e.currentTarget).attr("movie-id")))
-    $(document).on('click',    '.blogout',   ()  => this.logout());
+    $(document).on('click',    '.bsearch',      ()  => {this.search = $('.search').val(); this.searchMovies()})
+    $(document).on('enterKey', '.search',       ()  => {this.search = $('.search').val(); this.searchMovies()});
+    $(document).on('keypress', '.search',       (e) => {if (e.keyCode === 13) $('.search').trigger("enterKey");});
+    $(document).on('click',    '.add-movie',    (e) => this.addFavorite   ($(e.currentTarget).attr("movie-id")));
+    $(document).on('click',    '.remove-movie', (e) => this.removeFavorite($(e.currentTarget).attr("movie-id")));
+    
+    $(document).on('click',    '.blogout',      ()  => this.logout());
   };
 
   this.showMoviesPage();

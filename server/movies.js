@@ -84,8 +84,23 @@ exports.addFavorites = async (user, movie_id) => {
     .then(r => {
       resolve(r)
     })
-    .catch(error => {rejects(error)})
-    // .catch(error => {rejects(new Error(`Couldn't add favorite.`))})
+    .catch(error => {rejects(new Error(`Couldn't add favorite.`))})
+  })
+}
+
+exports.deleteFavorite = async (user, movie_id) => {
+  return await new Promise(async (resolve, rejects) => {
+    const favorite = {
+      username: user,
+      movie_id: movie_id
+    }
+    const res = await sql`
+    delete from favorites 
+    where username = ${user} and movie_id = ${movie_id}`
+    .then(r => {
+      resolve(r)
+    })
+    .catch(error => {rejects(new Error(`Couldn't remove favorite.`))})
   })
 }
 

@@ -227,7 +227,33 @@ const addFavoriteMovieController = (req, res, next) => {
     .then(r => {
       res.status(201).send({
         success: 'true',
-        message: 'Movie added as a favorite successfully.'
+        message: 'Movie added as favorite successfully.'
+      })
+    })
+    .catch(error => next(error));
+  })
+  .catch(error => next(error));
+}
+
+// DELETE /movies/favorite
+const deleteFavoriteMovieController = (req, res, next) => {
+  let {username, movie_id} = req.body;
+  movie_id = Number(movie_id);
+  if (username.length == 0)
+    throw Error(`Username is empty.`)
+  if (movie_id < 0)
+    throw Error(`Invalid movie_id.`)
+
+  moviesAPI.getMovie(movie_id)
+  .then(r => {
+    if (Number(r.movie_id) !== movie_id) {
+      throw Error(`Error deleting movie as favorite.`)
+    }
+    moviesAPI.deleteFavorite(username, movie_id)
+    .then(r => {
+      res.status(201).send({
+        success: 'true',
+        message: 'Movie removed as favorite successfully.'
       })
     })
     .catch(error => next(error));
@@ -284,8 +310,9 @@ app.get ('/movies/title/:title', getMoviesTitleController);
 app.get ('/movies/genres',       getGenresController);
 
 // FAVORITES ROUTER
-app.get ('/movies/favorite/:user', getFavoritesController);
-app.post('/movies/favorite/add',   addFavoriteMovieController);
+app.get   ('/movies/favorite/:user',  getFavoritesController);
+app.post  ('/movies/favorite/add',    addFavoriteMovieController);
+app.delete('/movies/favorite/delete', deleteFavoriteMovieController);
 
 
 app.use(errorController);
