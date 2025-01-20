@@ -189,6 +189,31 @@ const getGenresController = (req, res, next) => {
   .catch(error => next(Error(`Couldn't get genres:\n${error}`)));
 }
 
+// POST /movies/favorite/add
+const addFavoriteMovieController = (req, res, next) => {
+  let {username, movie_id} = req.body;
+  movie_id = Number(movie_id);
+  if (username.length == 0)
+    throw Error(`Username is empty.`)
+  if (movie_id < 0)
+    throw Error(`Invalid movie_id.`)
+
+  moviesAPI.getMovie(movie_id)
+  .then(r => {
+    if (Number(r.movie_id) !== movie_id) {
+      throw Error(`Error getting movie to add as favorite.`)
+    }
+    moviesAPI.addFavorites(username, movie_id)
+    .then(r => {
+      res.status(201).send({
+        success: 'true',
+        message: 'Movie added as a favorite successfully.'
+      })
+    })
+    .catch(error => next(error));
+  })
+  .catch(error => next(error));
+}
 
 const errorController = (err, req, res, next) => {
   res.status(409).send({
@@ -237,6 +262,10 @@ app.delete('/friends/delete',    deleteFriendsController);
 // MOVIES ROUTER
 app.get ('/movies/title/:title', getMoviesTitleController);
 app.get ('/movies/genres',       getGenresController);
+
+// FAVORITES ROUTER
+app.post('/movies/favorite/add', addFavoriteMovieController);
+
 
 app.use(errorController);
 

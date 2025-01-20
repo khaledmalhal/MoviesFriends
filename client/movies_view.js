@@ -12,11 +12,11 @@ function Movies(API_URL) {
       Cookie.delete('user');
       window.location.href = './index.html'
     } else {
-      $('.message').text(`User ${this.user} is logged in.`)
       $('.movies_body').html(`
         <div class="row row-gap-2 m-3">
           <input type="text"   class="col-auto m-2 w-25 search form-control" value="${this.search}" placeholder="Search for a movie title" onfocus="let v=this.value; this.value=''; this.value=v">
-          <input type="button" class="col-auto m-2 btn btn-primary justify-content-center" value="Search"></input>
+          <input type="button" class="col-auto m-2 btn btn-primary justify-content-center bsearch" value="Search"></input>
+          <label class="movies-msg"></label>
         </div>
         <hr>
         <div class="movies-list"></div>`)
@@ -37,11 +37,17 @@ function Movies(API_URL) {
       url: this.url+'title/'+this.search
     })
     .then(r => {
+      console.log(`Got ${r.movies.length} movies`)
       if (r.movies.length > 0) {
+        $('.movies-msg').text('')
         $('.movies-list').html(this.listMovies(r.movies))
       }
     })
-    .catch(error => {/* $('.message').text(JSON.parse(error.responseText).message)*/})
+    .catch(error => {
+      $('.movies-msg').removeClass('text-success');
+      $('.movies-msg').addClass('text-danger');
+      $('.movies-msg').text(error.responseJSON.message)
+    })
   };
 
   Movies.prototype.listMovies = function(movies) {
@@ -69,7 +75,7 @@ function Movies(API_URL) {
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sinopsis-${movie.movie_id}">
               Sinopsis
             </button>
-            <button type="button" class="btn btn-success" id="add-movie-${movie.movie_id}">
+            <button type="button" class="btn btn-success add-movie" movie-id="${movie.movie_id}" add-movie-${movie.movie_id}">
               Add to favorites
             </button>
           </div>
@@ -90,6 +96,29 @@ function Movies(API_URL) {
     `, "") + `</div></div>`
   }
 
+  Movies.prototype.addFavorite = function(movie_id) {
+    const params = {
+      username: this.user,
+      movie_id: movie_id
+    }
+    $.ajax({
+      method: 'POST',
+      dataType: 'json',
+      url: this.url+'favorite/add',
+      data: params
+    })
+    .then(r => {
+      $('.movies-msg').addClass('text-success');
+      $('.movies-msg').removeClass('text-danger');
+      $('.movies-msg').text(`${r.message}`);
+    })
+    .catch(error => {
+      $('.movies-msg').removeClass('text-success');
+      $('.movies-msg').addClass('text-danger');
+      $('.movies-msg').text(`${error.responseJSON.message}`);
+    })
+  }
+
   Movies.prototype.logout = function() {
     Cookie.delete('user');
     Cookie.delete('search');
@@ -99,10 +128,11 @@ function Movies(API_URL) {
   }
 
   Movies.prototype.eventsController = function() {
-    $(document).on('click',    '.bsearch', ()  => {this.search = $('.search').val(); this.searchMovies()})
-    $(document).on('enterKey', '.search',  ()  => {this.search = $('.search').val(); this.searchMovies()});
-    $(document).on('keypress', '.search',  (e) => {if (e.keyCode === 13) $('.search').trigger("enterKey");});
-    $(document).on('click',    '.blogout', ()  => this.logout());
+    $(document).on('click',    '.bsearch',   ()  => {this.search = $('.search').val(); this.searchMovies()})
+    $(document).on('enterKey', '.search',    ()  => {this.search = $('.search').val(); this.searchMovies()});
+    $(document).on('keypress', '.search',    (e) => {if (e.keyCode === 13) $('.search').trigger("enterKey");});
+    $(document).on('click',    '.add-movie', (e) => this.addFavorite($(e.currentTarget).attr("movie-id")))
+    $(document).on('click',    '.blogout',   ()  => this.logout());
   };
 
   this.showMoviesPage();
